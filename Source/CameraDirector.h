@@ -56,6 +56,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Modes")
     void setMode(ECameraDirectorMode mode);
 
+    UFUNCTION(BlueprintCallable, Category = "Properties")
+    void setFPVGimbalEnabled(bool enabled);
+    UFUNCTION(BlueprintCallable, Category = "Properties")
+    void setFPVGimbalStabilization(float stabilization);
+    UFUNCTION(BlueprintCallable, Category = "Properties")
+    void setFPVGimbalPitch(float pitch);
+
     void initializeForBeginPlay(ECameraDirectorMode view_mode,
                                 AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera);
 
@@ -70,6 +77,7 @@ private:
     void attachSpringArm(bool attach);
     void disableCameras(bool fpv, bool backup, bool external, bool front);
     void notifyViewModeChanged();
+    void setModeInternal(ECameraDirectorMode mode);
 
 private:
     typedef common_utils::Utils Utils;

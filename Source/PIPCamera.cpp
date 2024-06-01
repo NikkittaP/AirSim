@@ -13,7 +13,7 @@
 //CinemAirSim
 APIPCamera::APIPCamera(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer
-                .SetDefaultSubobjectClass<UCineCameraComponent>(TEXT("CameraComponent")))
+        .SetDefaultSubobjectClass<UCineCameraComponent>(TEXT("CameraComponent")))
 {
     static ConstructorHelpers::FObjectFinder<UMaterial> mat_finder(TEXT("Material'/AirSim/HUDAssets/CameraSensorNoise.CameraSensorNoise'"));
     if (mat_finder.Succeeded()) {
@@ -21,8 +21,8 @@ APIPCamera::APIPCamera(const FObjectInitializer& ObjectInitializer)
     }
     else
         UAirBlueprintLib::LogMessageString("Cannot create noise material for the PIPCamera",
-                                           "",
-                                           LogDebugLevel::Failure);
+            "",
+            LogDebugLevel::Failure);
 
     static ConstructorHelpers::FObjectFinder<UMaterial> dist_mat_finder(TEXT("Material'/AirSim/HUDAssets/CameraDistortion.CameraDistortion'"));
     if (dist_mat_finder.Succeeded()) {
@@ -31,8 +31,8 @@ APIPCamera::APIPCamera(const FObjectInitializer& ObjectInitializer)
     }
     else
         UAirBlueprintLib::LogMessageString("Cannot create distortion material for the PIPCamera",
-                                           "",
-                                           LogDebugLevel::Failure);
+            "",
+            LogDebugLevel::Failure);
 
     PrimaryActorTick.bCanEverTick = true;
 
@@ -205,16 +205,23 @@ msr::airlib::ProjectionMatrix APIPCamera::getProjectionMatrix(const APIPCamera::
 void APIPCamera::Tick(float DeltaTime)
 {
     if (gimbal_stabilization_ > 0) {
+
+        if (droneActor_ != nullptr)
+        {
+            auto droneRotator = droneActor_->GetActorRotation();
+            gimbald_rotator_.Yaw = droneRotator.Yaw;
+        }
+
         FRotator rotator = this->GetActorRotation();
         if (!std::isnan(gimbald_rotator_.Pitch))
             rotator.Pitch = gimbald_rotator_.Pitch * gimbal_stabilization_ +
-                            rotator.Pitch * (1 - gimbal_stabilization_);
+            rotator.Pitch * (1 - gimbal_stabilization_);
         if (!std::isnan(gimbald_rotator_.Roll))
             rotator.Roll = gimbald_rotator_.Roll * gimbal_stabilization_ +
-                           rotator.Roll * (1 - gimbal_stabilization_);
+            rotator.Roll * (1 - gimbal_stabilization_);
         if (!std::isnan(gimbald_rotator_.Yaw))
             rotator.Yaw = gimbald_rotator_.Yaw * gimbal_stabilization_ +
-                          rotator.Yaw * (1 - gimbal_stabilization_);
+            rotator.Yaw * (1 - gimbal_stabilization_);
 
         this->SetActorRotation(rotator);
     }
@@ -343,7 +350,7 @@ std::vector<float> APIPCamera::getDistortionParams() const
 
     auto getParamValue = [this](const auto& name, float& val) {
         distortion_param_instance_->GetScalarParameterValue(FName(name), val);
-    };
+        };
 
     getParamValue(TEXT("K1"), param_values[0]);
     getParamValue(TEXT("K2"), param_values[1]);
@@ -357,6 +364,48 @@ std::vector<float> APIPCamera::getDistortionParams() const
 void APIPCamera::setDistortionParam(const std::string& param_name, float value)
 {
     distortion_param_instance_->SetScalarParameterValue(FName(param_name.c_str()), value);
+}
+
+void APIPCamera::setDronePawn(AActor* droneActor)
+{
+    droneActor_ = droneActor;
+}
+
+bool APIPCamera::getGimbalEnabled()
+{
+    return gimbal_enabled_;
+}
+
+void APIPCamera::setGimbalEnabled(bool enabled)
+{
+
+    gimbal_enabled_ = enabled;
+    if (!gimbal_enabled_)
+    {
+        if (droneActor_ != nullptr)
+        {
+            gimbald_rotator_ = droneActor_->GetActorRotation();
+            this->SetActorRotation(gimbald_rotator_);
+        }
+    }
+    this->SetActorTickEnabled(gimbal_enabled_);
+}
+
+void APIPCamera::setGimbalStabilization(float stabilization)
+{
+    gimbal_stabilization_ = Utils::clip(stabilization, 0.0f, 1.0f);
+}
+
+void APIPCamera::setGimbalRotator(float pitch, float roll)
+{
+    gimbald_rotator_.Pitch = pitch;
+    gimbald_rotator_.Roll = roll;
+
+    if (droneActor_ != nullptr)
+    {
+        auto droneRotator = droneActor_->GetActorRotation();
+        gimbald_rotator_.Yaw = droneRotator.Yaw;
+    }
 }
 
 void APIPCamera::setupCameraFromSettings(const APIPCamera::CameraSetting& camera_setting, const NedTransform& ned_transform)
@@ -418,8 +467,8 @@ void APIPCamera::setupCameraFromSettings(const APIPCamera::CameraSetting& camera
 }
 
 void APIPCamera::updateCaptureComponentSetting(USceneCaptureComponent2D* capture, UTextureRenderTarget2D* render_target,
-                                               bool auto_format, const EPixelFormat& pixel_format, const CaptureSetting& setting, const NedTransform& ned_transform,
-                                               bool force_linear_gamma)
+    bool auto_format, const EPixelFormat& pixel_format, const CaptureSetting& setting, const NedTransform& ned_transform,
+    bool force_linear_gamma)
 {
     if (auto_format) {
         render_target->InitAutoFormat(setting.width, setting.height); //256 X 144, X 480
