@@ -73,6 +73,7 @@ public class AirSim : ModuleRules
 
     public AirSim(ReadOnlyTargetRules Target) : base(Target)
     {
+        CppStandard = CppStandardVersion.Cpp17;
         //bEnforceIWYU = true; //to support 4.16
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -90,7 +91,7 @@ public class AirSim : ModuleRules
         PublicIncludePaths.Add(Path.Combine(AirLibPath, "deps", "eigen3"));
         AddOSLibDependencies(Target);
 
-        SetupCompileMode(CompileMode.HeaderOnlyWithRpc, Target);
+        SetupCompileMode(CompileMode.CppCompileWithRpc, Target);
     }
 
     private void AddOSLibDependencies(ReadOnlyTargetRules Target)
