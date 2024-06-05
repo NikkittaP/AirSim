@@ -68,7 +68,7 @@ void PawnSimApi::setStartPosition(const FVector& position, const FRotator& rotat
     //compute our home point
     Vector3r nedWrtOrigin = ned_transform_.toGlobalNed(initial_state_.start_location);
     home_geo_point_ = msr::airlib::EarthUtils::nedToGeodetic(nedWrtOrigin,
-                                                             AirSimSettings::singleton().origin_geopoint);
+        AirSimSettings::singleton().origin_geopoint);
 }
 
 void PawnSimApi::pawnTick(float dt)
@@ -92,8 +92,8 @@ void PawnSimApi::detectUsbRc()
             UAirBlueprintLib::LogMessageString("RC Controller on USB: ", joystick_state_.pid_vid == "" ? "(Detected)" : joystick_state_.pid_vid, LogDebugLevel::Informational);
         else
             UAirBlueprintLib::LogMessageString("RC Controller on USB not detected: ",
-                                               std::to_string(joystick_state_.connection_error_code),
-                                               LogDebugLevel::Informational);
+                std::to_string(joystick_state_.connection_error_code),
+                LogDebugLevel::Informational);
     }
 }
 
@@ -131,8 +131,8 @@ void PawnSimApi::createCamerasFromSettings()
         //get pose
         FVector position = transform.fromLocalNed(setting.position) - transform.fromLocalNed(Vector3r::Zero());
         FTransform camera_transform(FRotator(setting.rotation.pitch, setting.rotation.yaw, setting.rotation.roll),
-                                    position,
-                                    FVector(1., 1., 1.));
+            position,
+            FVector(1., 1., 1.));
 
         //spawn and attach camera to pawn
         APIPCamera* camera = params_.pawn->GetWorld()->SpawnActor<APIPCamera>(params_.pip_camera_class, camera_transform, camera_spawn_params);
@@ -144,7 +144,7 @@ void PawnSimApi::createCamerasFromSettings()
 }
 
 void PawnSimApi::onCollision(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp,
-                             bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+    bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
     // Deflect along the surface when we collide.
     //FRotator CurrentRotation = GetActorRotation(RootComponent);
@@ -191,6 +191,16 @@ void PawnSimApi::setRCForceFeedback(float rumble_strength, float auto_center)
     }
 }
 
+void PawnSimApi::setPosition(FVector Position, bool updateStartPosition)
+{
+    getPawn()->SetActorLocation(Position);
+
+    if (updateStartPosition)
+        setStartPosition(getUUPosition(), getUUOrientation());
+
+    kinematics_->setPose(getPose());
+}
+
 msr::airlib::RCData PawnSimApi::getRCData() const
 {
     joystick_.getJoyStickState(getRemoteControlID(), joystick_state_);
@@ -231,9 +241,9 @@ void PawnSimApi::displayCollisionEffect(FVector hit_location, const FHitResult& 
 {
     if (params_.collision_display_template != nullptr && Utils::isDefinitelyLessThan<double>(hit.ImpactNormal.Z, 0.0f)) {
         UParticleSystemComponent* particles = UGameplayStatics::SpawnEmitterAtLocation(params_.pawn->GetWorld(),
-                                                                                       params_.collision_display_template,
-                                                                                       FTransform(hit_location),
-                                                                                       true);
+            params_.collision_display_template,
+            FTransform(hit_location),
+            true);
         particles->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
     }
 }
@@ -277,8 +287,8 @@ bool PawnSimApi::testLineOfSightToPoint(const msr::airlib::GeoPoint& lla) const
         // Transform from LLA to NED
         const auto& settings = AirSimSettings::singleton();
         msr::airlib::GeodeticConverter converter(settings.origin_geopoint.home_geo_point.latitude,
-                                                 settings.origin_geopoint.home_geo_point.longitude,
-                                                 settings.origin_geopoint.home_geo_point.altitude);
+            settings.origin_geopoint.home_geo_point.longitude,
+            settings.origin_geopoint.home_geo_point.altitude);
         double north, east, down;
         converter.geodetic2Ned(lla.latitude, lla.longitude, lla.altitude, &north, &east, &down);
         msr::airlib::Vector3r ned(north, east, down);
@@ -301,8 +311,8 @@ bool PawnSimApi::testLineOfSightToPoint(const msr::airlib::GeoPoint& lla) const
                 params_.pawn->GetWorld()->LineBatcher->DrawLine(params_.pawn->GetActorLocation(), target_location, color, SDPG_World, 10, -1);
             }
         }
-    },
-                                             true);
+        },
+        true);
 
     return !hit;
 }
@@ -438,8 +448,8 @@ void PawnSimApi::setPose(const Pose& pose, bool ignore_collision)
 {
     UAirBlueprintLib::RunCommandOnGameThread([this, pose, ignore_collision]() {
         setPoseInternal(pose, ignore_collision);
-    },
-                                             true);
+        },
+        true);
 }
 
 void PawnSimApi::setPoseInternal(const Pose& pose, bool ignore_collision)
@@ -564,7 +574,7 @@ std::string PawnSimApi::getRecordFileLine(bool is_header_line) const
     ss << timestamp_millis << "\t";
     ss << kinematics->pose.position.x() << "\t" << kinematics->pose.position.y() << "\t" << kinematics->pose.position.z() << "\t";
     ss << kinematics->pose.orientation.w() << "\t" << kinematics->pose.orientation.x() << "\t"
-       << kinematics->pose.orientation.y() << "\t" << kinematics->pose.orientation.z() << "\t";
+        << kinematics->pose.orientation.y() << "\t" << kinematics->pose.orientation.z() << "\t";
 
     return ss.str();
 }

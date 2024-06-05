@@ -164,6 +164,43 @@ const NedTransform& ASimModeBase::getGlobalNedTransform()
     return *global_ned_transform_;
 }
 
+TArray<FString> ASimModeBase::getVehiclesNames()
+{
+    TArray<FString> UnrealNames;
+    auto Names = api_provider_->getVehicleSimApis().keys();
+    for (auto Name : Names)
+    {
+        if (Name.find_first_not_of(' ') != std::string::npos)
+        {
+            UnrealNames.Add(FString(Name.c_str()));
+        }
+    }
+
+    return UnrealNames;
+}
+
+bool ASimModeBase::getVehiclePosition(const FString& VehicleName, FVector& Position)
+{
+    auto VehicleSimApi = getVehicleSimApi(std::string(TCHAR_TO_UTF8(*VehicleName)));
+    if (VehicleSimApi == nullptr)
+        return false;
+
+    Position = VehicleSimApi->getUUPosition();
+
+    return true;
+}
+
+bool ASimModeBase::setVehiclePosition(const FString& VehicleName, FVector Position, bool updateStartPosition)
+{
+    auto VehicleSimApi = getVehicleSimApi(std::string(TCHAR_TO_UTF8(*VehicleName)));
+    if (VehicleSimApi == nullptr)
+        return false;
+
+    VehicleSimApi->setPosition(Position, updateStartPosition);
+
+    return true;
+}
+
 void ASimModeBase::checkVehicleReady()
 {
     for (auto& api : api_provider_->getVehicleApis()) {

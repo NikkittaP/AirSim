@@ -87,6 +87,16 @@ public:
     {
         return api_provider_.get();
     }
+
+    UFUNCTION(BlueprintCallable, Category = "Airsim | get stuff")
+    TArray<FString> getVehiclesNames();
+
+    UFUNCTION(BlueprintCallable, Category = "Airsim | get stuff")
+    bool getVehiclePosition(const FString& VehicleName, FVector& Position);
+
+    UFUNCTION(BlueprintCallable, Category = "Airsim | set stuff")
+    bool setVehiclePosition(const FString& VehicleName, FVector Position, bool updateStartPosition);
+
     const PawnSimApi* getVehicleSimApi(const std::string& vehicle_name = "") const
     {
         return static_cast<PawnSimApi*>(api_provider_->getVehicleSimApi(vehicle_name));

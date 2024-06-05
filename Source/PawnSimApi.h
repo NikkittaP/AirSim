@@ -134,6 +134,10 @@ public: //Unreal specific methods
     void possess();
     void setRCForceFeedback(float rumble_strength, float auto_center);
 
+    // Update position through Unreal's FVector.
+    // If updateStartPosition = true, then starting position will also be updated.
+    void setPosition(FVector Position, bool updateStartPosition = false);
+
 private: //methods
     bool canTeleportWhileMove() const;
     void allowPassthroughToggleInput();
