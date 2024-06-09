@@ -201,6 +201,25 @@ bool ASimModeBase::setVehiclePosition(const FString& VehicleName, FVector Positi
     return true;
 }
 
+void ASimModeBase::setHomeGeoPosition(FVector HomeGeoPosition)
+{
+
+    msr::airlib::GeoPoint origin = AirSimSettings::singleton().origin_geopoint.home_geo_point;
+    origin.latitude = HomeGeoPosition.Y;
+    origin.longitude = HomeGeoPosition.X;
+    origin.altitude = HomeGeoPosition.Z;
+    AirSimSettings::singleton().origin_geopoint.initialize(origin);
+
+    for (auto VehicleName : getVehiclesNames())
+    {
+        auto VehicleSimApi = getVehicleSimApi(std::string(TCHAR_TO_UTF8(*VehicleName)));
+        if (VehicleSimApi == nullptr)
+            continue;
+
+        VehicleSimApi->setHomeGeoPosition(HomeGeoPosition);
+    }
+}
+
 void ASimModeBase::checkVehicleReady()
 {
     for (auto& api : api_provider_->getVehicleApis()) {

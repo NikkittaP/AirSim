@@ -97,6 +97,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Airsim | set stuff")
     bool setVehiclePosition(const FString& VehicleName, FVector Position, bool updateStartPosition);
 
+    UFUNCTION(BlueprintCallable, Category = "Airsim | set stuff")
+    void setHomeGeoPosition(FVector HomeGeoPosition);
+
     const PawnSimApi* getVehicleSimApi(const std::string& vehicle_name = "") const
     {
         return static_cast<PawnSimApi*>(api_provider_->getVehicleSimApi(vehicle_name));

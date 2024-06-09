@@ -138,6 +138,10 @@ public: //Unreal specific methods
     // If updateStartPosition = true, then starting position will also be updated.
     void setPosition(FVector Position, bool updateStartPosition = false);
 
+    // Update OriginGeopoint position
+    // FVector in degrees and meters (lon; lat; alt)
+    void setHomeGeoPosition(FVector HomeGeoPosition);
+
 private: //methods
     bool canTeleportWhileMove() const;
     void allowPassthroughToggleInput();
@@ -162,7 +166,6 @@ private: //vars
     common_utils::UniqueValueMap<std::string, APIPCamera*> cameras_;
     msr::airlib::GeoPoint home_geo_point_;
 
-    std::string vehicle_name_;
     NedTransform ned_transform_;
 
     FVector ground_trace_end_;

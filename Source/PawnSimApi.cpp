@@ -196,9 +196,27 @@ void PawnSimApi::setPosition(FVector Position, bool updateStartPosition)
     getPawn()->SetActorLocation(Position);
 
     if (updateStartPosition)
-        setStartPosition(getUUPosition(), getUUOrientation());
+    {
+        const auto& pawn_ned_pos = ned_transform_.toLocalNed(params_.pawn->GetActorLocation());
+        params_.home_geopoint = msr::airlib::EarthUtils::nedToGeodetic(pawn_ned_pos, AirSimSettings::singleton().origin_geopoint);
 
-    kinematics_->setPose(getPose());
+        setStartPosition(getUUPosition(), getUUOrientation());
+        resetImplementation();
+    }
+}
+
+void PawnSimApi::setHomeGeoPosition(FVector HomeGeoPosition)
+{
+    const FTransform uu_origin = ned_transform_.getGlobalTransform();
+
+    FVector spawn_position = uu_origin.GetLocation();
+
+    const auto* vehicle_setting = AirSimSettings::singleton().getVehicleSetting(getVehicleName());
+    Vector3r settings_position = vehicle_setting->position;
+    if (!VectorMath::hasNan(settings_position))
+        spawn_position = ned_transform_.fromGlobalNed(settings_position);
+
+    setPosition(spawn_position, true);
 }
 
 msr::airlib::RCData PawnSimApi::getRCData() const
@@ -322,6 +340,16 @@ void PawnSimApi::resetImplementation()
     state_ = initial_state_;
     rc_data_ = msr::airlib::RCData();
     params_.pawn->SetActorLocationAndRotation(state_.start_location, state_.start_rotation, false, nullptr, ETeleportType::TeleportPhysics);
+
+    Kinematics::State initial_kinematic_state = Kinematics::State::zero();
+    initial_kinematic_state.pose = getPose();
+    kinematics_->initialize(initial_kinematic_state);
+
+    Environment::State initial_environment;
+    initial_environment.position = initial_kinematic_state.pose.position;
+    initial_environment.geo_point = params_.home_geopoint;
+    environment_->initialize(initial_environment);
+
     kinematics_->reset();
     environment_->reset();
 }
