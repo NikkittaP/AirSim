@@ -39,6 +39,9 @@ public:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void Tick(float DeltaSeconds) override;
 
+    UFUNCTION(BlueprintCallable, Category = "AirSimHUD")
+    void LoadAirSim(const FString& SettingsFileName = "");
+
 protected:
     virtual void setupInputBindings();
     void toggleRecordHandler();
@@ -74,4 +77,6 @@ private:
 
     APIPCamera* subwindow_cameras_[AirSimSettings::kSubwindowCount];
     bool map_changed_;
+
+    FString SettingsFileName_;
 };

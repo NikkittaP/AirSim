@@ -167,12 +167,16 @@ const NedTransform& ASimModeBase::getGlobalNedTransform()
 TArray<FString> ASimModeBase::getVehiclesNames()
 {
     TArray<FString> UnrealNames;
-    auto Names = api_provider_->getVehicleSimApis().keys();
-    for (auto Name : Names)
+
+    if (api_provider_!=nullptr)
     {
-        if (Name.find_first_not_of(' ') != std::string::npos)
+        auto Names = api_provider_->getVehicleSimApis().keys();
+        for (auto Name : Names)
         {
-            UnrealNames.Add(FString(Name.c_str()));
+            if (Name.find_first_not_of(' ') != std::string::npos)
+            {
+                UnrealNames.Add(FString(Name.c_str()));
+            }
         }
     }
 
