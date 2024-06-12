@@ -205,6 +205,13 @@ void PawnSimApi::setPosition(FVector Position, bool updateStartPosition)
     }
 }
 
+void PawnSimApi::setRotation(FRotator Rotation)
+{
+    getPawn()->SetActorRotation(Rotation);
+    setStartPosition(getUUPosition(), getUUOrientation());
+    resetImplementation();
+}
+
 void PawnSimApi::setHomeGeoPosition(FVector HomeGeoPosition)
 {
     const FTransform uu_origin = ned_transform_.getGlobalTransform();

@@ -205,6 +205,17 @@ bool ASimModeBase::setVehiclePosition(const FString& VehicleName, FVector Positi
     return true;
 }
 
+bool ASimModeBase::setVehicleRotation(const FString& VehicleName, FRotator Rotation)
+{
+    auto VehicleSimApi = getVehicleSimApi(std::string(TCHAR_TO_UTF8(*VehicleName)));
+    if (VehicleSimApi == nullptr)
+        return false;
+
+    VehicleSimApi->setRotation(Rotation);
+
+    return true;
+}
+
 void ASimModeBase::setHomeGeoPosition(FVector HomeGeoPosition)
 {
 

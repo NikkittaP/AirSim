@@ -138,6 +138,9 @@ public: //Unreal specific methods
     // If updateStartPosition = true, then starting position will also be updated.
     void setPosition(FVector Position, bool updateStartPosition = false);
 
+    // Update rotation through Unreal's FRotator.
+    void setRotation(FRotator Rotation);
+
     // Update OriginGeopoint position
     // FVector in degrees and meters (lon; lat; alt)
     void setHomeGeoPosition(FVector HomeGeoPosition);
