@@ -386,6 +386,10 @@ namespace airlib
                 next.twist.angular = Vector3r::Zero();
             }
             else {
+                float damping_coefficient = 1.0f;
+                Vector3r damping_torque = -damping_coefficient * current.twist.angular;
+                next_wrench.torque += damping_torque;
+
                 //get new angular acceleration
                 //Euler's rotation equation: https://en.wikipedia.org/wiki/Euler's_equations_(body_dynamics)
                 //we will use torque to find out the angular acceleration
