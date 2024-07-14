@@ -535,6 +535,8 @@ void ASimModeBase::initializeCameraDirector(const FTransform& camera_transform, 
         CameraDirector->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(external_camera_class_,
                                                                                   camera_transform,
                                                                                   camera_spawn_params);
+        CameraDirector->ExternalCamera->AttachToActor(CameraDirector, FAttachmentTransformRules::KeepWorldTransform);
+        CameraDirector->ExternalCamera->SetActorLabel(FString("ExternalCamera [") + external_camera_class_->GetName() + "]");
     }
     else {
         CameraDirector = static_cast<ACameraDirector*>(camera_dirs[0]);
