@@ -235,6 +235,18 @@ void ASimModeBase::setHomeGeoPosition(FVector HomeGeoPosition)
     }
 }
 
+bool ASimModeBase::SwitchPossession(const FString& VehicleName)
+{
+    auto VehicleSimApi = getVehicleSimApi(std::string(TCHAR_TO_UTF8(*VehicleName)));
+    if (VehicleSimApi == nullptr)
+        return false;
+
+    VehicleSimApi->possess();
+    CameraDirector->switchPossession(VehicleSimApi->getPawn(), VehicleSimApi->getCamera("fpv"), VehicleSimApi->getCamera("back_center"), nullptr);
+
+    return true;
+}
+
 void ASimModeBase::checkVehicleReady()
 {
     for (auto& api : api_provider_->getVehicleApis()) {

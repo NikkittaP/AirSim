@@ -61,45 +61,7 @@ void ACameraDirector::initializeForBeginPlay(ECameraDirectorMode view_mode,
 
     mode_ = view_mode;
 
-    follow_actor_ = follow_actor;
-    fpv_camera_ = fpv_camera;
-    fpv_camera_->setDronePawn(follow_actor_);
-    front_camera_ = front_camera;
-    backup_camera_ = back_camera;
-    camera_start_location_ = ExternalCamera->GetActorLocation();
-    camera_start_rotation_ = ExternalCamera->GetActorRotation();
-    initial_ground_obs_offset_ = camera_start_location_ -
-        (follow_actor_ ? follow_actor_->GetActorLocation() : FVector::ZeroVector);
-
-    //set initial view mode
-    switch (mode_) {
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME:
-        inputEventFlyWithView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FPV:
-        inputEventFpvView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_GROUND_OBSERVER:
-        inputEventGroundView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_MANUAL:
-        inputEventManualView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE:
-        inputEventSpringArmChaseView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_BACKUP:
-        inputEventBackupView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_NODISPLAY:
-        inputEventNoDisplayView();
-        break;
-    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FRONT:
-        inputEventFrontView();
-        break;
-    default:
-        throw std::out_of_range("Unsupported view mode specified in CameraDirector::initializeForBeginPlay");
-    }
+    switchPossession(follow_actor, fpv_camera, front_camera, back_camera);
 }
 
 void ACameraDirector::attachSpringArm(bool attach)
@@ -184,6 +146,49 @@ void ACameraDirector::setFPVGimbalStabilization(float stabilization)
 void ACameraDirector::setFPVGimbalPitch(float pitch)
 {
     getFpvCamera()->setGimbalRotator(pitch, 0.0f);
+}
+
+void ACameraDirector::switchPossession(AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera)
+{
+    follow_actor_ = follow_actor;
+    fpv_camera_ = fpv_camera;
+    fpv_camera_->setDronePawn(follow_actor_);
+    front_camera_ = front_camera;
+    backup_camera_ = back_camera;
+    camera_start_location_ = ExternalCamera->GetActorLocation();
+    camera_start_rotation_ = ExternalCamera->GetActorRotation();
+    initial_ground_obs_offset_ = camera_start_location_ -
+        (follow_actor_ ? follow_actor_->GetActorLocation() : FVector::ZeroVector);
+
+    //set initial view mode
+    switch (mode_) {
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME:
+        inputEventFlyWithView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FPV:
+        inputEventFpvView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_GROUND_OBSERVER:
+        inputEventGroundView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_MANUAL:
+        inputEventManualView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE:
+        inputEventSpringArmChaseView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_BACKUP:
+        inputEventBackupView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_NODISPLAY:
+        inputEventNoDisplayView();
+        break;
+    case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FRONT:
+        inputEventFrontView();
+        break;
+    default:
+        throw std::out_of_range("Unsupported view mode specified in CameraDirector::initializeForBeginPlay");
+    }
 }
 
 void ACameraDirector::setupInputBindings()

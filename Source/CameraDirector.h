@@ -72,6 +72,8 @@ public:
     void setFollowDistance(const int follow_distance) { this->follow_distance_ = follow_distance; }
     void setCameraRotationLagEnabled(const bool lag_enabled) { this->camera_rotation_lag_enabled_ = lag_enabled; }
 
+    void switchPossession(AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera);
+
 private:
     void setupInputBindings();
     void attachSpringArm(bool attach);
