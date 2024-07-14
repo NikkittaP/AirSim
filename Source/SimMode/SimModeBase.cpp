@@ -703,6 +703,7 @@ APawn* ASimModeBase::createVehiclePawn(const AirSimSettings::VehicleSetting& veh
         getSettings().pawn_paths.at(getVehiclePawnPathName(vehicle_setting)).pawn_bp);
     APawn* spawned_pawn = static_cast<APawn*>(this->GetWorld()->SpawnActor(
         vehicle_bp_class, &spawn_position, &spawn_rotation, pawn_spawn_params));
+    spawned_pawn->SetActorLabel(FString(vehicle_name.c_str()) + " [" + vehicle_bp_class->GetName() + "]");
 
     spawned_actors_.Add(spawned_pawn);
 
