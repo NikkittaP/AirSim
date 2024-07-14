@@ -20,14 +20,19 @@ void AFlyingPawn::initializeForBeginPlay()
     //get references of existing camera
     camera_front_right_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("FrontRightCamera")))->GetChildActor());
+    camera_front_right_->SetActorLabel(FString("FrontRightCamera"));
     camera_front_left_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("FrontLeftCamera")))->GetChildActor());
+    camera_front_right_->SetActorLabel(FString("FrontLeftCamera"));
     camera_front_center_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("FrontCenterCamera")))->GetChildActor());
+    camera_front_right_->SetActorLabel(FString("FrontCenterCamera"));
     camera_back_center_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("BackCenterCamera")))->GetChildActor());
+    camera_front_right_->SetActorLabel(FString("BackCenterCamera"));
     camera_bottom_center_ = Cast<APIPCamera>(
         (UAirBlueprintLib::GetActorComponent<UChildActorComponent>(this, TEXT("BottomCenterCamera")))->GetChildActor());
+    camera_front_right_->SetActorLabel(FString("BottomCenterCamera"));
 }
 
 void AFlyingPawn::Tick(float DeltaSeconds)
