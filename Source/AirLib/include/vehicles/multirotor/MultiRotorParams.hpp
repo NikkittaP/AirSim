@@ -313,23 +313,31 @@ namespace airlib
             //set up arm lengths
             //dimensions are for F450 frame: http://artofcircuits.com/product/quadcopter-frame-hj450-with-power-distribution
             params.rotor_count = 4;
-            std::vector<real_T> arm_lengths(params.rotor_count, 0.68f); //0.2275f
+            //std::vector<real_T> arm_lengths(params.rotor_count, 0.2275f);
+            std::vector<real_T> arm_lengths(params.rotor_count, 0.68f);
 
             //set up mass
             //this has to be between max_thrust*rotor_count/10 (1.6kg using default parameters in RotorParams.hpp) and (idle throttle percentage)*max_thrust*rotor_count/10 (0.8kg using default parameters and SimpleFlight)
             //any value above the maximum would result in the motors not being able to lift the body even at max thrust,
             //and any value below the minimum would cause the drone to fly upwards on idling throttle (50% of the max throttle if using SimpleFlight)
             //Note that the default idle throttle percentage is 50% if you are using SimpleFlight
+            //params.mass = 1.0f;
             params.mass = 18.0f;
 
-            real_T motor_assembly_weight = 0.72f;//0.055f; //weight for MT2212 motor for F450 frame
+            //real_T motor_assembly_weight = 0.055f; //weight for MT2212 motor for F450 frame
+            real_T motor_assembly_weight = 0.72f; //weight for MT2212 motor for F450 frame
             real_T box_mass = params.mass - params.rotor_count * motor_assembly_weight;
 
             // using rotor_param default, but if you want to change any of the rotor_params, call calculateMaxThrust() to recompute the max_thrust
             // given new thrust coefficients, motor max_rpm and propeller diameter.
-            params.rotor_params.calculateMaxThrust();
+            //params.rotor_params.calculateMaxThrust();
 
             //set up dimensions of core body box or abdomen (not including arms).
+            //params.body_box.x() = 0.180f;
+            //params.body_box.y() = 0.11f;
+            //params.body_box.z() = 0.040f;
+            //real_T rotor_z = 2.5f / 100;
+
             params.body_box.x() = 0.40f;
             params.body_box.y() = 0.40f;
             params.body_box.z() = 0.12f;
