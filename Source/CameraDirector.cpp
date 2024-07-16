@@ -93,7 +93,7 @@ void ACameraDirector::attachSpringArm(bool attach)
         //ExternalCamera->bUsePawnControlRotation = false;
     }
     else { //detach
-        if (last_parent_ && ExternalCamera->GetRootComponent()->GetAttachParent() == SpringArm) {
+        if (ExternalCamera->GetRootComponent()->GetAttachParent() == SpringArm) {
             ExternalCamera->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
             ExternalCamera->AttachToComponent(last_parent_, FAttachmentTransformRules::KeepRelativeTransform);
         }
@@ -150,6 +150,10 @@ void ACameraDirector::setFPVGimbalPitch(float pitch)
 
 void ACameraDirector::switchPossession(AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera)
 {
+    if (mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE || mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME) {
+        attachSpringArm(false);
+    }
+
     follow_actor_ = follow_actor;
     fpv_camera_ = fpv_camera;
     fpv_camera_->setDronePawn(follow_actor_);
@@ -230,7 +234,7 @@ APIPCamera* ACameraDirector::getBackupCamera() const
 void ACameraDirector::inputEventSpringArmChaseView()
 {
     if (ExternalCamera) {
-        SpringArm->TargetArmLength = 125.0f;
+        //SpringArm->TargetArmLength = 125.0f;
         setModeInternal(ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE);
         ExternalCamera->showToScreen();
         disableCameras(true, true, false, true);
@@ -309,7 +313,7 @@ void ACameraDirector::inputEventFrontView()
 void ACameraDirector::inputEventFlyWithView()
 {
     if (ExternalCamera) {
-        SpringArm->TargetArmLength = 3 * 125.0f;
+        //SpringArm->TargetArmLength = 3 * 125.0f;
         setModeInternal(ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME);
         ExternalCamera->showToScreen();
 
@@ -361,13 +365,23 @@ void ACameraDirector::notifyViewModeChanged()
 
 void ACameraDirector::setModeInternal(ECameraDirectorMode mode)
 {
+    FVector CurrentCameraWorldLocation = camera_start_location_;
+    FRotator CurrentCameraWorldRotation = camera_start_rotation_;
 
     { //first remove any settings done by previous mode
+
+        if (mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FPV)
+        {
+            CurrentCameraWorldLocation = fpv_camera_->GetActorLocation();
+            CurrentCameraWorldRotation = fpv_camera_->GetActorRotation();
+        }
 
         //detach spring arm
         if ((mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE &&
             mode != ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE) || (mode_ == ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME &&
                 mode != ECameraDirectorMode::CAMERA_DIRECTOR_MODE_FLY_WITH_ME)) {
+            CurrentCameraWorldLocation = ExternalCamera->GetActorLocation();
+            CurrentCameraWorldRotation = ExternalCamera->GetActorRotation();
             attachSpringArm(false);
         }
 
@@ -392,6 +406,7 @@ void ACameraDirector::setModeInternal(ECameraDirectorMode mode)
         switch (mode) {
         case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_MANUAL:
             //if new mode is manual mode then add key bindings
+            ExternalCamera->SetActorLocationAndRotation(CurrentCameraWorldLocation, CurrentCameraWorldRotation);
             manual_pose_controller_->setActor(ExternalCamera);
             break;
         case ECameraDirectorMode::CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE:
