@@ -157,6 +157,9 @@ void ASimModeBase::BeginPlay()
 
     loading_screen_widget_->AddToViewport();
     loading_screen_widget_->SetVisibility(ESlateVisibility::Hidden);
+
+    FTimerHandle TimerHandle_DelayedBroadcast;
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle_DelayedBroadcast, [this] {OnDronesLoaded.Broadcast(); }, 0.1f, false);
 }
 
 const NedTransform& ASimModeBase::getGlobalNedTransform()

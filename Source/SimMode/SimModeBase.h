@@ -19,6 +19,7 @@
 #include "SimModeBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelLoaded);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDronesLoaded);
 
 UCLASS()
 class AIRSIM_API ASimModeBase : public AActor
@@ -28,6 +29,9 @@ public:
 
     UPROPERTY(BlueprintAssignable, BlueprintCallable)
     FLevelLoaded OnLevelLoaded;
+
+    UPROPERTY(BlueprintAssignable, BlueprintCallable)
+    FOnDronesLoaded OnDronesLoaded;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Refs")
     ACameraDirector* CameraDirector;
