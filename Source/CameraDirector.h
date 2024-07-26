@@ -57,9 +57,13 @@ public:
     void setMode(ECameraDirectorMode mode);
 
     UFUNCTION(BlueprintCallable, Category = "Properties")
+    bool getFPVGimbalEnabled();
+    UFUNCTION(BlueprintCallable, Category = "Properties")
     void setFPVGimbalEnabled(bool enabled);
     UFUNCTION(BlueprintCallable, Category = "Properties")
     void setFPVGimbalStabilization(float stabilization);
+    UFUNCTION(BlueprintCallable, Category = "Properties")
+    float getFPVGimbalPitch();
     UFUNCTION(BlueprintCallable, Category = "Properties")
     void setFPVGimbalPitch(float pitch);
 

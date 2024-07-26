@@ -133,6 +133,11 @@ void ACameraDirector::setMode(ECameraDirectorMode mode)
     }
 }
 
+bool ACameraDirector::getFPVGimbalEnabled()
+{
+    return getFpvCamera()->getGimbalEnabled();
+}
+
 void ACameraDirector::setFPVGimbalEnabled(bool enabled)
 {
     getFpvCamera()->setGimbalEnabled(enabled);
@@ -143,9 +148,14 @@ void ACameraDirector::setFPVGimbalStabilization(float stabilization)
     getFpvCamera()->setGimbalStabilization(stabilization);
 }
 
+float ACameraDirector::getFPVGimbalPitch()
+{
+    return getFpvCamera()->getGimbalRotatorPitch();
+}
+
 void ACameraDirector::setFPVGimbalPitch(float pitch)
 {
-    getFpvCamera()->setGimbalRotator(pitch, 0.0f);
+    getFpvCamera()->setGimbalRotatorPitch(pitch);
 }
 
 void ACameraDirector::switchPossession(AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera)

@@ -378,7 +378,6 @@ bool APIPCamera::getGimbalEnabled()
 
 void APIPCamera::setGimbalEnabled(bool enabled)
 {
-
     gimbal_enabled_ = enabled;
     if (!gimbal_enabled_)
     {
@@ -396,16 +395,24 @@ void APIPCamera::setGimbalStabilization(float stabilization)
     gimbal_stabilization_ = Utils::clip(stabilization, 0.0f, 1.0f);
 }
 
-void APIPCamera::setGimbalRotator(float pitch, float roll)
+float APIPCamera::getGimbalRotatorPitch()
 {
-    gimbald_rotator_.Pitch = pitch;
-    gimbald_rotator_.Roll = roll;
+    return gimbald_rotator_.Pitch;
+}
 
-    if (droneActor_ != nullptr)
-    {
-        auto droneRotator = droneActor_->GetActorRotation();
-        gimbald_rotator_.Yaw = droneRotator.Yaw;
-    }
+void APIPCamera::setGimbalRotatorPitch(float value)
+{
+    gimbald_rotator_.Pitch = value;
+}
+
+float APIPCamera::getGimbalRotatorRoll()
+{
+    return gimbald_rotator_.Roll;
+}
+
+void APIPCamera::setGimbalRotatorRoll(float value)
+{
+    gimbald_rotator_.Roll = value;
 }
 
 void APIPCamera::setupCameraFromSettings(const APIPCamera::CameraSetting& camera_setting, const NedTransform& ned_transform)

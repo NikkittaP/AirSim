@@ -79,7 +79,10 @@ public:
     bool getGimbalEnabled();
     void setGimbalEnabled(bool enabled);
     void setGimbalStabilization(float stabilization);
-    void setGimbalRotator(float pitch, float roll);
+    float getGimbalRotatorPitch();
+    void setGimbalRotatorPitch(float value);
+    float getGimbalRotatorRoll();
+    void setGimbalRotatorRoll(float value);
 
     msr::airlib::ProjectionMatrix getProjectionMatrix(const ImageType image_type) const;
 
