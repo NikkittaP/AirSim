@@ -550,7 +550,10 @@ void ASimModeBase::initializeCameraDirector(const FTransform& camera_transform, 
         CameraDirector->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(external_camera_class_,
                                                                                   camera_transform,
                                                                                   camera_spawn_params);
-        CameraDirector->ExternalCamera->SetActorLabel(FString("ExternalCamera [") + external_camera_class_->GetName() + "]");
+        
+        #if WITH_EDITOR
+            CameraDirector->ExternalCamera->SetActorLabel(FString("ExternalCamera [") + external_camera_class_->GetName() + "]");
+        #endif
     }
     else {
         CameraDirector = static_cast<ACameraDirector*>(camera_dirs[0]);
@@ -719,7 +722,10 @@ APawn* ASimModeBase::createVehiclePawn(const AirSimSettings::VehicleSetting& veh
         getSettings().pawn_paths.at(getVehiclePawnPathName(vehicle_setting)).pawn_bp);
     APawn* spawned_pawn = static_cast<APawn*>(this->GetWorld()->SpawnActor(
         vehicle_bp_class, &spawn_position, &spawn_rotation, pawn_spawn_params));
-    spawned_pawn->SetActorLabel(FString(vehicle_name.c_str()) + " [" + vehicle_bp_class->GetName() + "]");
+
+    #if WITH_EDITOR
+        spawned_pawn->SetActorLabel(FString(vehicle_name.c_str()) + " [" + vehicle_bp_class->GetName() + "]");
+    #endif
 
     spawned_actors_.Add(spawned_pawn);
 
