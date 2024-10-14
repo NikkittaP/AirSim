@@ -6,6 +6,8 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 
 AExponentialHeightFog* UWeatherLib::weather_fog_ = nullptr;
+TArray<AActor*>		   UWeatherLib::spawned_weather_actors_;
+AActor*				   UWeatherLib::spawned_menu_actor_ = nullptr;
 
 UMaterialParameterCollectionInstance* UWeatherLib::getWeatherMaterialCollectionInstance(UWorld* World)
 {
@@ -47,6 +49,8 @@ void UWeatherLib::initWeather(UWorld* World, TArray<AActor*> ActorsToAttachTo)
                 AActor* SpawnedWeatherActor = World->SpawnActor(WeatherActorClass, &Location, &Rotation, WeatherActorSpawnInfo);
 
                 SpawnedWeatherActor->AttachToActor(ActorsToAttachTo[i], FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true));
+
+                spawned_weather_actors_.Add(SpawnedWeatherActor);
             }
         }
         else {
@@ -60,7 +64,7 @@ void UWeatherLib::initWeather(UWorld* World, TArray<AActor*> ActorsToAttachTo)
             const FRotator Rotation = FRotator(0.0f, 0.0f, 0.0f);
             FActorSpawnParameters SpawnInfo;
             SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-            World->SpawnActor(MenuActorClass, &Location, &Rotation, SpawnInfo);
+            spawned_menu_actor_ = World->SpawnActor(MenuActorClass, &Location, &Rotation, SpawnInfo);
         }
         else {
             UE_LOG(LogTemp, Warning, TEXT("Warning, WeatherAPI got invalid menu actor class!"));
@@ -68,6 +72,16 @@ void UWeatherLib::initWeather(UWorld* World, TArray<AActor*> ActorsToAttachTo)
     }
 
     //showWeatherMenu(WorldContextObject);
+}
+void UWeatherLib::deinitWeather()
+{
+	for (auto spawned_weather_actor : spawned_weather_actors_)
+	{
+		spawned_weather_actor->Destroy();
+	}
+	spawned_weather_actors_.Empty();
+
+    spawned_menu_actor_->Destroy();
 }
 void UWeatherLib::setWeatherParamScalar(UWorld* World, EWeatherParamScalar Param, float Amount)
 {

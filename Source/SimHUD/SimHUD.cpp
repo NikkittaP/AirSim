@@ -62,14 +62,13 @@ void ASimHUD::LoadAirSim(const FString& SettingsFileName)
     }
 }
 
-void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ASimHUD::UnloadAirSim()
 {
     if (simmode_)
         simmode_->stopApiServer();
 
     if (widget_) {
-        widget_->Destruct();
-        widget_ = nullptr;
+		DestroyMainWidget();
     }
     if (simmode_) {
         simmode_->Destroy();
@@ -77,6 +76,11 @@ void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 
     UAirBlueprintLib::OnEndPlay();
+}
+
+void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    UnloadAirSim();
 
     Super::EndPlay(EndPlayReason);
 }
@@ -195,6 +199,13 @@ void ASimHUD::createMainWidget()
     updateWidgetSubwindowVisibility();
 }
 
+void ASimHUD::DestroyMainWidget()
+{
+	widget_->RemoveFromViewport();
+	widget_->Destruct();
+	widget_ = nullptr;
+}
+
 void ASimHUD::setUnrealEngineSettings()
 {
     //TODO: should we only do below on SceneCapture2D components and cameras?
@@ -311,7 +322,7 @@ void ASimHUD::initializeSubWindows()
         //setup defaults
         if (camera_count > 0) {
             subwindow_cameras_[0] = default_vehicle_sim_api->getCamera("");
-            subwindow_cameras_[1] = default_vehicle_sim_api->getCamera(""); //camera_count > 3 ? 3 : 0
+            subwindow_cameras_[1] = nullptr;// default_vehicle_sim_api->getCamera(""); //camera_count > 3 ? 3 : 0
             subwindow_cameras_[2] = default_vehicle_sim_api->getCamera(""); //camera_count > 4 ? 4 : 0
         }
         else

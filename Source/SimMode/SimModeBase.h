@@ -70,7 +70,7 @@ public:
     virtual void setExtForce(const msr::airlib::Vector3r& ext_force) const;
 
     virtual void setTimeOfDay(bool is_enabled, const std::string& start_datetime, bool is_start_datetime_dst,
-                              float celestial_clock_speed, float update_interval_secs, bool move_sun);
+        float celestial_clock_speed, float update_interval_secs, bool move_sun);
 
     virtual void startRecording();
     virtual void stopRecording();
@@ -83,7 +83,7 @@ public:
     bool isApiServerStarted();
 
     bool createVehicleAtRuntime(const std::string& vehicle_name, const std::string& vehicle_type,
-                                const msr::airlib::Pose& pose, const std::string& pawn_path = "");
+        const msr::airlib::Pose& pose, const std::string& pawn_path = "");
 
     const NedTransform& getGlobalNedTransform();
 
@@ -161,7 +161,7 @@ protected: //must overrides
     virtual std::unique_ptr<PawnSimApi> createVehicleSimApi(
         const PawnSimApi::Params& pawn_sim_api_params) const;
     virtual msr::airlib::VehicleApiBase* getVehicleApi(const PawnSimApi::Params& pawn_sim_api_params,
-                                                       const PawnSimApi* sim_api) const;
+        const PawnSimApi* sim_api) const;
     virtual void registerPhysicsBody(msr::airlib::VehicleSimApiBase* physicsBody);
 
 protected: //optional overrides

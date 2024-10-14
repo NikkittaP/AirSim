@@ -41,6 +41,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "AirSimHUD")
     void LoadAirSim(const FString& SettingsFileName = "");
+    UFUNCTION(BlueprintCallable, Category = "AirSimHUD")
+    void UnloadAirSim();
 
 protected:
     virtual void setupInputBindings();
@@ -56,6 +58,7 @@ private:
     void setUnrealEngineSettings();
     void loadLevel();
     void createMainWidget();
+    void DestroyMainWidget();
     const std::vector<AirSimSettings::SubwindowSetting>& getSubWindowSettings() const;
     std::vector<AirSimSettings::SubwindowSetting>& getSubWindowSettings();
 

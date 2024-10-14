@@ -89,10 +89,24 @@ namespace airlib
             //update controller which will update actuator control signal
             vehicle_api_->update();
 
-            //transfer new input values from controller to rotors
-            for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index) {
-                rotors_.at(rotor_index).setControlSignal(vehicle_api_->getActuation(rotor_index));
-            }
+            /* async udp receive
+            // update only if new udp packet is received
+			if (vehicle_api_->getRotorControlReceived())
+			{
+				//transfer new input values from controller to rotors
+				for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
+				{
+					rotors_.at(rotor_index)
+						.setControlSignal(vehicle_api_->getActuation(rotor_index));
+				}
+			}
+            */
+
+			//transfer new input values from controller to rotors
+			for (uint rotor_index = 0; rotor_index < rotors_.size(); ++rotor_index)
+			{
+				rotors_.at(rotor_index).setControlSignal(vehicle_api_->getActuation(rotor_index));
+			}
         }
 
         //sensor getter
