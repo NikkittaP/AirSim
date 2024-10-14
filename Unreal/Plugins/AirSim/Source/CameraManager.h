@@ -7,23 +7,23 @@
 #include "ManualPoseController.h"
 #include "common/common_utils/Utils.hpp"
 #include "GameFramework/SpringArmComponent.h"
-#include "CameraDirector.generated.h"
+#include "CameraManager.generated.h"
 
 UENUM(BlueprintType)
-enum class ECameraDirectorMode : uint8
+enum class ECameraManagerMode : uint8
 {
-    CAMERA_DIRECTOR_MODE_FPV = 0 UMETA(DisplayName = "FPV"),
-    CAMERA_DIRECTOR_MODE_GROUND_OBSERVER = 1 UMETA(DisplayName = "GroundObserver"),
-    CAMERA_DIRECTOR_MODE_FLY_WITH_ME = 2 UMETA(DisplayName = "FlyWithMe"),
-    CAMERA_DIRECTOR_MODE_MANUAL = 3 UMETA(DisplayName = "Manual"),
-    CAMERA_DIRECTOR_MODE_SPRINGARM_CHASE = 4 UMETA(DisplayName = "SpringArmChase"),
-    CAMERA_DIRECTOR_MODE_BACKUP = 5 UMETA(DisplayName = "Backup"),
-    CAMERA_DIRECTOR_MODE_NODISPLAY = 6 UMETA(DisplayName = "No Display"),
-    CAMERA_DIRECTOR_MODE_FRONT = 7 UMETA(DisplayName = "Front")
+    CAMERA_MANAGER_MODE_FPV = 0 UMETA(DisplayName = "FPV"),
+    CAMERA_MANAGER_MODE_GROUND_OBSERVER = 1 UMETA(DisplayName = "GroundObserver"),
+    CAMERA_MANAGER_MODE_FLY_WITH_ME = 2 UMETA(DisplayName = "FlyWithMe"),
+    CAMERA_MANAGER_MODE_MANUAL = 3 UMETA(DisplayName = "Manual"),
+    CAMERA_MANAGER_MODE_SPRINGARM_CHASE = 4 UMETA(DisplayName = "SpringArmChase"),
+    CAMERA_MANAGER_MODE_BACKUP = 5 UMETA(DisplayName = "Backup"),
+    CAMERA_MANAGER_MODE_NODISPLAY = 6 UMETA(DisplayName = "No Display"),
+    CAMERA_MANAGER_MODE_FRONT = 7 UMETA(DisplayName = "Front")
 };
 
 UCLASS()
-class AIRSIM_API ACameraDirector : public AActor
+class AIRSIM_API ACameraManager : public AActor
 {
     GENERATED_BODY()
 
@@ -46,15 +46,15 @@ public:
     void inputEventFrontView();
 
 public:
-    ACameraDirector();
+    ACameraManager();
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void Tick(float DeltaSeconds) override;
 
     UFUNCTION(BlueprintCallable, Category = "Modes")
-    ECameraDirectorMode getMode();
+    ECameraManagerMode getMode();
     UFUNCTION(BlueprintCallable, Category = "Modes")
-    void setMode(ECameraDirectorMode mode);
+    void setMode(ECameraManagerMode mode);
 
     UFUNCTION(BlueprintCallable, Category = "Properties")
     bool getFPVGimbalEnabled();
@@ -67,7 +67,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Properties")
     void setFPVGimbalPitch(float pitch);
 
-    void initializeForBeginPlay(ECameraDirectorMode view_mode,
+    void initializeForBeginPlay(ECameraManagerMode view_mode,
                                 AActor* follow_actor, APIPCamera* fpv_camera, APIPCamera* front_camera, APIPCamera* back_camera);
 
     APIPCamera* getFpvCamera() const;
@@ -83,7 +83,7 @@ private:
     void attachSpringArm(bool attach);
     void disableCameras(bool fpv, bool backup, bool external, bool front);
     void notifyViewModeChanged();
-    void setModeInternal(ECameraDirectorMode mode);
+    void setModeInternal(ECameraManagerMode mode);
 
 private:
     typedef common_utils::Utils Utils;
@@ -95,7 +95,7 @@ private:
 
     USceneComponent* last_parent_ = nullptr;
 
-    ECameraDirectorMode mode_;
+    ECameraManagerMode mode_;
     UPROPERTY()
     UManualPoseController* manual_pose_controller_;
 
