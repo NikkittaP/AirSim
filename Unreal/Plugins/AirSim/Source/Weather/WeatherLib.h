@@ -127,7 +127,10 @@ public:
     // ActorsToAttachTo is an array of actors that we will attach weather particles to
     // in most cases, this will be the playable pawns so they will always have weather fx
     UFUNCTION(BlueprintCallable, Category = Weather)
-    static void initWeather(UWorld* World, TArray<AActor*> ActorsToAttachTo);
+	static void initWeather(UWorld* World, TArray<AActor*> ActorsToAttachTo);
+
+	UFUNCTION(BlueprintCallable, Category = Weather)
+	static void deinitWeather();
 
     /* only sets or gets one param. need any actor in the world for WorldContextObject, so we can get world*/
     UFUNCTION(BlueprintCallable, Category = Weather)
@@ -177,5 +180,9 @@ public:
     static void setWeatherFog(AExponentialHeightFog* fog);
 
 private:
-    static AExponentialHeightFog* weather_fog_;
+	static AExponentialHeightFog* weather_fog_;
+
+	static TArray<AActor*> spawned_weather_actors_;
+
+	static AActor* spawned_menu_actor_;
 };

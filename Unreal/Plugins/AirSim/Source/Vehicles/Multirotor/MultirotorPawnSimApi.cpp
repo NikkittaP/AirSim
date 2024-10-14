@@ -155,7 +155,10 @@ void MultirotorPawnSimApi::resetImplementation()
     PawnSimApi::resetImplementation();
 
     vehicle_api_->reset();
+
+    //vehicle_params_.get()->getSensors().initialize(&getKinematics()->getState(), getEnvironment());
     multirotor_physics_body_->reset();
+
     vehicle_api_messages_.clear();
 }
 

@@ -74,6 +74,16 @@ public:
     std::vector<float> getDistortionParams() const;
     void setDistortionParam(const std::string& param_name, float value);
 
+    void setDronePawn(AActor* droneActor);
+
+    bool getGimbalEnabled();
+    void setGimbalEnabled(bool enabled);
+    void setGimbalStabilization(float stabilization);
+    float getGimbalRotatorPitch();
+    void setGimbalRotatorPitch(float value);
+    float getGimbalRotatorRoll();
+    void setGimbalRotatorRoll(float value);
+
     msr::airlib::ProjectionMatrix getProjectionMatrix(const ImageType image_type) const;
 
     USceneCaptureComponent2D* getCaptureComponent(const ImageType type, bool if_active);
@@ -110,8 +120,12 @@ private: //members
     UMaterial* distortion_material_static_;
 
     std::vector<bool> camera_type_enabled_;
+
+    AActor* droneActor_ = nullptr;
+    bool gimbal_enabled_;
     FRotator gimbald_rotator_;
     float gimbal_stabilization_;
+
     const NedTransform* ned_transform_;
     TMap<int, EPixelFormat> image_type_to_pixel_format_map_;
 
@@ -125,8 +139,8 @@ private: //methods
     static unsigned int imageTypeCount();
     void enableCaptureComponent(const ImageType type, bool is_enabled);
     static void updateCaptureComponentSetting(USceneCaptureComponent2D* capture, UTextureRenderTarget2D* render_target,
-                                              bool auto_format, const EPixelFormat& pixel_format, const CaptureSetting& setting, const NedTransform& ned_transform,
-                                              bool force_linear_gamma);
+        bool auto_format, const EPixelFormat& pixel_format, const CaptureSetting& setting, const NedTransform& ned_transform,
+        bool force_linear_gamma);
     void setNoiseMaterial(int image_type, UObject* outer, FPostProcessSettings& obj, const NoiseSetting& settings);
     void setDistortionMaterial(int image_type, UObject* outer, FPostProcessSettings& obj);
     static void updateCameraPostProcessingSetting(FPostProcessSettings& obj, const CaptureSetting& setting);

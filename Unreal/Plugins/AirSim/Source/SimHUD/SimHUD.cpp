@@ -10,6 +10,10 @@
 #include "common/AirSimSettings.hpp"
 #include <stdexcept>
 
+namespace {
+    const FString& DefaultSettingsFileName = "settings.json";
+}
+
 ASimHUD::ASimHUD()
 {
     static ConstructorHelpers::FClassFinder<UUserWidget> hud_widget_class(TEXT("WidgetBlueprint'/AirSim/Blueprints/BP_SimHUDWidget'"));
@@ -19,9 +23,24 @@ ASimHUD::ASimHUD()
 void ASimHUD::BeginPlay()
 {
     Super::BeginPlay();
+}
 
+void ASimHUD::Tick(float DeltaSeconds)
+{
+    if (simmode_ && simmode_->EnableReport)
+        widget_->updateDebugReport(simmode_->getDebugReport());
+}
+
+void ASimHUD::LoadAirSim(const FString& SettingsFileName)
+{
     try {
         UAirBlueprintLib::OnBeginPlay();
+
+        if (SettingsFileName.IsEmpty())
+            SettingsFileName_ = ::DefaultSettingsFileName;
+        else
+            SettingsFileName_ = SettingsFileName;
+
         initializeSettings();
         loadLevel();
 
@@ -43,20 +62,13 @@ void ASimHUD::BeginPlay()
     }
 }
 
-void ASimHUD::Tick(float DeltaSeconds)
-{
-    if (simmode_ && simmode_->EnableReport)
-        widget_->updateDebugReport(simmode_->getDebugReport());
-}
-
-void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ASimHUD::UnloadAirSim()
 {
     if (simmode_)
         simmode_->stopApiServer();
 
     if (widget_) {
-        widget_->Destruct();
-        widget_ = nullptr;
+		DestroyMainWidget();
     }
     if (simmode_) {
         simmode_->Destroy();
@@ -64,6 +76,11 @@ void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
     }
 
     UAirBlueprintLib::OnEndPlay();
+}
+
+void ASimHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    UnloadAirSim();
 
     Super::EndPlay(EndPlayReason);
 }
@@ -182,6 +199,13 @@ void ASimHUD::createMainWidget()
     updateWidgetSubwindowVisibility();
 }
 
+void ASimHUD::DestroyMainWidget()
+{
+	widget_->RemoveFromViewport();
+	widget_->Destruct();
+	widget_ = nullptr;
+}
+
 void ASimHUD::setUnrealEngineSettings()
 {
     //TODO: should we only do below on SceneCapture2D components and cameras?
@@ -229,7 +253,7 @@ void ASimHUD::initializeSettings()
         UAirBlueprintLib::LogMessageString(warning, "", LogDebugLevel::Failure);
     }
     for (const auto& error : AirSimSettings::singleton().error_messages) {
-        UAirBlueprintLib::ShowMessage(EAppMsgType::Ok, error, "settings.json");
+        UAirBlueprintLib::ShowMessage(EAppMsgType::Ok, error, TCHAR_TO_UTF8(*SettingsFileName_));
     }
 }
 
@@ -298,7 +322,7 @@ void ASimHUD::initializeSubWindows()
         //setup defaults
         if (camera_count > 0) {
             subwindow_cameras_[0] = default_vehicle_sim_api->getCamera("");
-            subwindow_cameras_[1] = default_vehicle_sim_api->getCamera(""); //camera_count > 3 ? 3 : 0
+            subwindow_cameras_[1] = nullptr;// default_vehicle_sim_api->getCamera(""); //camera_count > 3 ? 3 : 0
             subwindow_cameras_[2] = default_vehicle_sim_api->getCamera(""); //camera_count > 4 ? 4 : 0
         }
         else
@@ -332,9 +356,9 @@ FString ASimHUD::getLaunchPath(const std::string& filename)
 bool ASimHUD::getSettingsText(std::string& settingsText)
 {
     return (getSettingsTextFromCommandLine(settingsText) ||
-            readSettingsTextFromFile(FString(msr::airlib::Settings::getExecutableFullPath("settings.json").c_str()), settingsText) ||
-            readSettingsTextFromFile(getLaunchPath("settings.json"), settingsText) ||
-            readSettingsTextFromFile(FString(msr::airlib::Settings::Settings::getUserDirectoryFullPath("settings.json").c_str()), settingsText));
+            readSettingsTextFromFile(FString(msr::airlib::Settings::getExecutableFullPath(TCHAR_TO_UTF8(*SettingsFileName_)).c_str()), settingsText) ||
+            readSettingsTextFromFile(getLaunchPath(TCHAR_TO_UTF8(*SettingsFileName_)), settingsText) ||
+            readSettingsTextFromFile(FString(msr::airlib::Settings::Settings::getUserDirectoryFullPath(TCHAR_TO_UTF8(*SettingsFileName_)).c_str()), settingsText));
 }
 
 // Attempts to parse the settings file path or the settings text from the command line

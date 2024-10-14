@@ -21,9 +21,7 @@ public class AirSim : ModuleRules
     }
     private string ProjectBinariesPath
     {
-        get
-        {
-            return Path.Combine(
+        get { return Path.Combine(
                 Directory.GetParent(AirSimPluginPath).Parent.FullName, "Binaries");
         }
     }
@@ -75,6 +73,7 @@ public class AirSim : ModuleRules
 
     public AirSim(ReadOnlyTargetRules Target) : base(Target)
     {
+        CppStandard = CppStandardVersion.Cpp17;
         //bEnforceIWYU = true; //to support 4.16
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -107,12 +106,12 @@ public class AirSim : ModuleRules
             PublicAdditionalLibraries.Add("dxguid.lib");
         }
 
-        if (Target.Platform == UnrealTargetPlatform.Linux)
-        {
-            // needed when packaging
-            PublicAdditionalLibraries.Add("stdc++");
-            PublicAdditionalLibraries.Add("supc++");
-        }
+		if (Target.Platform == UnrealTargetPlatform.Linux)
+		{
+			// needed when packaging
+			PublicAdditionalLibraries.Add("stdc++");
+			PublicAdditionalLibraries.Add("supc++");
+		}
     }
 
     static void CopyFileIfNewer(string srcFilePath, string destFolder)
@@ -144,9 +143,7 @@ public class AirSim : ModuleRules
             isLibrarySupported = true;
 
             PublicAdditionalLibraries.Add(Path.Combine(LibPath, PlatformString, ConfigurationString, LibFileName + ".lib"));
-        }
-        else if (Target.Platform == UnrealTargetPlatform.Linux || Target.Platform == UnrealTargetPlatform.Mac)
-        {
+        } else if (Target.Platform == UnrealTargetPlatform.Linux || Target.Platform == UnrealTargetPlatform.Mac) {
             isLibrarySupported = true;
             PublicAdditionalLibraries.Add(Path.Combine(LibPath, "lib" + LibFileName + ".a"));
         }
