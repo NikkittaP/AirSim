@@ -46,8 +46,9 @@ ASimModeBase::ASimModeBase()
 
     static ConstructorHelpers::FClassFinder<APIPCamera> external_camera_class(TEXT("Blueprint'/AirSim/Blueprints/BP_PIPCamera'"));
     external_camera_class_ = external_camera_class.Succeeded() ? external_camera_class.Class : nullptr;
-    static ConstructorHelpers::FClassFinder<ACameraDirector> camera_director_class(TEXT("Blueprint'/AirSim/Blueprints/BP_CameraDirector'"));
-    camera_director_class_ = camera_director_class.Succeeded() ? camera_director_class.Class : nullptr;
+	static ConstructorHelpers::FClassFinder<ACameraManager> camera_manager_class(
+		TEXT("Blueprint'/AirSim/Blueprints/BP_CameraDirector'"));
+    camera_manager_class_ = camera_manager_class.Succeeded() ? camera_manager_class.Class : nullptr;
 
     static ConstructorHelpers::FObjectFinder<UParticleSystem> collision_display(TEXT("ParticleSystem'/AirSim/StarterContent/Particles/P_Explosion.P_Explosion'"));
     if (!collision_display.Succeeded())
@@ -251,7 +252,8 @@ bool ASimModeBase::SwitchPossession(const FString& VehicleName)
         return false;
 
     VehicleSimApi->possess();
-    CameraDirector->switchPossession(VehicleSimApi->getPawn(), VehicleSimApi->getCamera("fpv"), VehicleSimApi->getCamera("back_center"), nullptr);
+	CameraManager->switchPossession(VehicleSimApi->getPawn(), VehicleSimApi->getCamera("fpv"),
+		VehicleSimApi->getCamera("back_center"), nullptr);
 
     return true;
 }
@@ -292,7 +294,7 @@ void ASimModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     api_server_.reset();
     global_ned_transform_.reset();
 
-    CameraDirector = nullptr;
+    CameraManager = nullptr;
     sky_sphere_ = nullptr;
     sun_ = nullptr;
 
@@ -529,9 +531,9 @@ void ASimModeBase::setupInputBindings()
     UAirBlueprintLib::BindActionToKey("InputEventResetAll", EKeys::BackSpace, this, &ASimModeBase::reset);
 }
 
-ECameraDirectorMode ASimModeBase::getInitialViewMode() const
+ECameraManagerMode ASimModeBase::getInitialViewMode() const
 {
-    return Utils::toEnum<ECameraDirectorMode>(getSettings().initial_view_mode);
+	return Utils::toEnum<ECameraManagerMode>(getSettings().initial_view_mode);
 }
 
 const msr::airlib::AirSimSettings& ASimModeBase::getSettings() const
@@ -539,32 +541,36 @@ const msr::airlib::AirSimSettings& ASimModeBase::getSettings() const
     return AirSimSettings::singleton();
 }
 
-void ASimModeBase::initializeCameraDirector(const FTransform& camera_transform, float follow_distance)
+void ASimModeBase::initializeCameraManager(
+	const FTransform& camera_transform, float follow_distance)
 {
     TArray<AActor*> camera_dirs;
-    UAirBlueprintLib::FindAllActor<ACameraDirector>(this, camera_dirs);
+	UAirBlueprintLib::FindAllActor<ACameraManager>(this, camera_dirs);
     if (camera_dirs.Num() == 0) {
         //create director
         FActorSpawnParameters camera_spawn_params;
         camera_spawn_params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-        camera_spawn_params.Name = "CameraDirector";
-        CameraDirector = this->GetWorld()->SpawnActor<ACameraDirector>(camera_director_class_,
+        camera_spawn_params.Name = "CameraManager";
+		CameraManager = this->GetWorld()->SpawnActor<ACameraManager>(
+			camera_manager_class_,
             camera_transform,
             camera_spawn_params);
-        CameraDirector->setFollowDistance(follow_distance);
-        CameraDirector->setCameraRotationLagEnabled(false);
+		CameraManager->setFollowDistance(follow_distance);
+		CameraManager->setCameraRotationLagEnabled(false);
         //create external camera required for the director
         camera_spawn_params.Name = "ExternalCamera";
-        CameraDirector->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(external_camera_class_,
+		CameraManager->ExternalCamera = this->GetWorld()->SpawnActor<APIPCamera>(
+			external_camera_class_,
             camera_transform,
             camera_spawn_params);
 
 #if WITH_EDITOR
-        CameraDirector->ExternalCamera->SetActorLabel(FString("ExternalCamera [") + external_camera_class_->GetName() + "]");
+		CameraManager->ExternalCamera->SetActorLabel(
+			FString("ExternalCamera [") + external_camera_class_->GetName() + "]");
 #endif
     }
     else {
-        CameraDirector = static_cast<ACameraDirector*>(camera_dirs[0]);
+		CameraManager = static_cast<ACameraManager*>(camera_dirs[0]);
     }
 }
 
@@ -821,7 +827,7 @@ void ASimModeBase::setupVehiclesAndCamera()
         getGlobalNedTransform().fromLocalNed(camera_director_setting.position);
     FTransform camera_transform(toFRotator(camera_director_setting.rotation, FRotator::ZeroRotator),
         camera_director_position_uu);
-    initializeCameraDirector(camera_transform, camera_director_setting.follow_distance);
+	initializeCameraManager(camera_transform, camera_director_setting.follow_distance);
 
     //find all vehicle pawns
     {
@@ -870,10 +876,13 @@ void ASimModeBase::setupVehiclesAndCamera()
     if (getApiProvider()->hasDefaultVehicle()) {
         //TODO: better handle no FPV vehicles scenario
         getVehicleSimApi()->possess();
-        CameraDirector->initializeForBeginPlay(getInitialViewMode(), getVehicleSimApi()->getPawn(), getVehicleSimApi()->getCamera("fpv"), getVehicleSimApi()->getCamera("back_center"), nullptr);
+		CameraManager->initializeForBeginPlay(getInitialViewMode(), getVehicleSimApi()->getPawn(),
+			getVehicleSimApi()->getCamera("fpv"), getVehicleSimApi()->getCamera("back_center"),
+			nullptr);
     }
     else
-        CameraDirector->initializeForBeginPlay(getInitialViewMode(), nullptr, nullptr, nullptr, nullptr);
+		CameraManager->initializeForBeginPlay(
+			getInitialViewMode(), nullptr, nullptr, nullptr, nullptr);
 
     checkVehicleReady();
 }

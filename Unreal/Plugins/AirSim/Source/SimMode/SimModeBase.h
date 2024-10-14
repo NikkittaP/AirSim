@@ -7,7 +7,7 @@
 #include "ParticleDefinitions.h"
 
 #include <string>
-#include "CameraDirector.h"
+#include "CameraManager.h"
 #include "common/AirSimSettings.hpp"
 #include "common/ClockFactory.hpp"
 #include "api/ApiServerBase.hpp"
@@ -34,7 +34,7 @@ public:
     FOnDronesLoaded OnDronesLoaded;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Refs")
-    ACameraDirector* CameraDirector;
+	ACameraManager* CameraManager;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debugging")
     bool EnableReport = false;
@@ -59,7 +59,7 @@ public:
 
     //additional overridable methods
     virtual std::string getDebugReport();
-    virtual ECameraDirectorMode getInitialViewMode() const;
+	virtual ECameraManagerMode getInitialViewMode() const;
 
     virtual bool isPaused() const;
     virtual void pause(bool is_paused);
@@ -171,7 +171,7 @@ protected: //optional overrides
     virtual void setupInputBindings();
     //called when SimMode should handle clock speed setting
     virtual void setupClockSpeed();
-    void initializeCameraDirector(const FTransform& camera_transform, float follow_distance);
+    void initializeCameraManager(const FTransform& camera_transform, float follow_distance);
     void checkVehicleReady(); //checks if vehicle is available to use
     virtual void updateDebugReport(msr::airlib::StateReporterWrapper& debug_reporter);
     virtual void initializeExternalCameras();
@@ -202,7 +202,7 @@ private:
     UPROPERTY()
     UClass* external_camera_class_;
     UPROPERTY()
-    UClass* camera_director_class_;
+    UClass* camera_manager_class_;
     UPROPERTY()
     UClass* sky_sphere_class_;
     UPROPERTY()
