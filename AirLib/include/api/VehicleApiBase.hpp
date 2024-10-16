@@ -71,6 +71,14 @@ Some methods may not be applicable to specific vehicle in which case an exceptio
         }
 
         //below APIs are used by FastPhysicsEngine
+
+		/* async udp receive
+		virtual bool getRotorControlReceived()
+		{
+			throw VehicleCommandNotImplementedException(
+				"getRotorControlReceived API is not supported for this vehicle");
+		}
+        */
         virtual real_T getActuation(unsigned int actuator_index) const
         {
             unused(actuator_index);

@@ -404,3 +404,5 @@ PythonClient/docs/_build
 .cache/
 
 AirLibRebuild/AirLib/*
+AirLib/include/vehicles/multirotor/MultiRotorParams_airborne.hpp
+AirLib/include/vehicles/multirotor/RotorParams_airborne.hpp

@@ -34,8 +34,15 @@ namespace airlib
     {
 
     public:
-        ArduCopterApi(const MultiRotorParams* vehicle_params, const AirSimSettings::MavLinkConnectionInfo& connection_info)
-            : connection_info_(connection_info), vehicle_params_(vehicle_params)
+        ArduCopterApi(const MultiRotorParams* vehicle_params, const AirSimSettings::MavLinkConnectionInfo& connection_info) :
+			connection_info_(connection_info),
+			vehicle_params_(vehicle_params)
+			/* async udp receive
+			, 
+			is_udp_connected_(false),
+			packet_received(false),
+			update_requested(false)
+			*/
         {
             sensors_ = &getSensors();
 
@@ -59,6 +66,11 @@ namespace airlib
         virtual void update() override
         {
             MultirotorApiBase::update();
+
+            /* async udp receive
+			std::lock_guard<std::mutex> lock(mutex_update_requested);
+			update_requested = true;
+			*/
 
             sendSensors();
             recvRotorControl();
@@ -97,6 +109,18 @@ namespace airlib
         }
 
     public: //TODO:MultirotorApiBase implementation
+		/* async udp receive
+		virtual bool getRotorControlReceived() override
+		{
+			std::lock_guard<std::mutex> lock(mutex_packet_received);
+
+			bool ret_val = packet_received;
+
+			packet_received = false;
+
+			return ret_val;
+		}
+		*/
         virtual real_T getActuation(unsigned int rotor_index) const override
         {
             return rotor_controls_[rotor_index];
@@ -298,6 +322,10 @@ namespace airlib
     protected:
         void closeConnections()
         {
+			/* async udp receive
+			is_udp_connected_ = false;
+			*/
+
             if (udp_socket_ != nullptr)
                 udp_socket_->close();
         }
@@ -322,6 +350,13 @@ namespace airlib
 
             udp_socket_ = std::make_unique<mavlinkcom::UdpSocket>();
             udp_socket_->bind(connection_info_.local_host_ip, connection_info_.control_port_local);
+			
+			/* async udp receive
+			is_udp_connected_ = true;
+
+			std::thread recv_rotor_thread([this]() { this->recvRotorControl(); });
+			recv_rotor_thread.detach();
+			*/
         }
 
     private:
@@ -481,6 +516,66 @@ namespace airlib
             // Receive motor data
             RotorControlMessage pkt;
             int recv_ret = udp_socket_->recv(&pkt, sizeof(pkt), 100);
+
+			/* async udp receive
+			while (is_udp_connected_)
+			{
+				bool need_update = false;
+
+				{
+					std::lock_guard<std::mutex> lock(mutex_update_requested);
+					need_update = update_requested;
+					update_requested = false;
+				}
+
+				if (need_update)
+				{
+					while (recv_ret != sizeof(pkt))
+					{
+						if (!is_udp_connected_)
+							break;
+
+						if (recv_ret <= 0)
+						{
+							Utils::log(Utils::stringf(
+										   "Error while receiving rotor control data - ErrorNo: %d",
+										   recv_ret),
+								Utils::kLogLevelInfo);
+						}
+						else
+						{
+							Utils::log(Utils::stringf("Received %d bytes instead of %zu bytes",
+										   recv_ret, sizeof(pkt)),
+								Utils::kLogLevelInfo);
+						}
+
+						recv_ret = udp_socket_->recv(&pkt, sizeof(pkt), 100);
+					}
+
+					if (!is_udp_connected_)
+						break;
+
+					// Lock the mutex to safely modify the packet_received variable
+					{
+						std::lock_guard<std::mutex> lock(mutex_packet_received);
+
+						for (auto i = 0; i < kArduCopterRotorControlCount; ++i)
+						{
+							rotor_controls_[i] = pkt.pwm[i];
+						}
+
+						normalizeRotorControls();
+
+						packet_received = true;
+					}
+				}
+				else
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(30));
+				}
+			}
+			*/
+
             while (recv_ret != sizeof(pkt)) {
                 if (recv_ret <= 0) {
                     Utils::log(Utils::stringf("Error while receiving rotor control data - ErrorNo: %d", recv_ret), Utils::kLogLevelInfo);
@@ -508,6 +603,14 @@ namespace airlib
         };
 
         std::unique_ptr<mavlinkcom::UdpSocket> udp_socket_;
+		
+		/* async udp receive
+		bool	   is_udp_connected_;
+		bool	   packet_received;
+		std::mutex mutex_packet_received; // Mutex to protect access to packet_received
+		bool	   update_requested;
+		std::mutex mutex_update_requested; // Mutex to protect access to update_requested
+		*/
 
         AirSimSettings::MavLinkConnectionInfo connection_info_;
         uint16_t port_;
